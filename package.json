@@ -1,0 +1,26 @@
+{
+  "name": "degiro-gui",
+  "version": "1.0.0",
+  "description": "GUI based on DeGiro Node JS API.",
+  "main": "main.js",
+  "dependencies": {
+    "degiro": "^3.1.0"
+  },
+  "devDependencies": {
+    "electron": "2.0.5",
+    "electron-packager": "^12.1.0"
+  },
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexpilk/dgro.git"
+  },
+  "author": "Oleksii Pilkevych",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexpilk/dgro/issues"
+  },
+  "homepage": "https://github.com/alexpilk/dgro#readme"
+}
