@@ -1,9 +1,15 @@
 const DeGiro = require('degiro');
 
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-const {app, BrowserWindow} = require('electron');
+const {app, ipcMain, BrowserWindow} = require('electron');
 let win;
+
+ipcMain.on('product_id', function (event, product_id) {
+    global.products.push(product_id);
+    console.log('Received ' + product_id)
+});
 
 async function createWindow() {
     const degiro = DeGiro.create();
@@ -12,6 +18,8 @@ async function createWindow() {
     global.session = session;
     global.sessionId = session.id;
     global.sessionAccount = session.account;
+
+    global.products = [];
 
     win = new BrowserWindow({width: 800, height: 600});
     win.loadFile('app/index.html');
