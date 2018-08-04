@@ -1,38 +1,45 @@
-const {app, BrowserWindow, globalShortcut} = require('electron');
+const DeGiro = require('degiro');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
+const {app, BrowserWindow} = require('electron');
 let win;
 
-function createWindow() {
-    // Create the browser window.
-    win = new BrowserWindow({width: 800, height: 600});
+async function createWindow() {
+    const degiro = DeGiro.create();
+    const session = await degiro.login();
 
-    // and load the index.html of the app.
-    win.loadFile('index.html');
+    global.session = session;
+    global.sessionId = session.id;
+    global.sessionAccount = session.account;
+
+    win = new BrowserWindow({width: 800, height: 600});
+    win.loadFile('app/index.html');
 
     // Open the DevTools.
     win.webContents.openDevTools();
 
-    // Emitted when the window is closed.
     win.on('closed', () => {
-        // Dereference the window object, usually you would store windows
-        // in an array if your app supports multi windows, this is the time
-        // when you should delete the corresponding element.
         win = null
     });
+    win.setAlwaysOnTop(true, "floating");
 
-    var events = require('./degiro-events');
-    globalShortcut.register('CommandOrControl+X', () => {
-      console.log('CommandOrControl+X is pressed');
-        events.getData();
-    })
+    //
+    // var events = require('./degiro-events');
+    // globalShortcut.register('CommandOrControl+X', () => {
+    //   console.log('CommandOrControl+X is pressed');
+    //     events.getData();
+    // })
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+app.on('ready', () => {
+    createWindow();
+    // require('./shortcut-listeners');
+    // enableShortcutListeners();
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {

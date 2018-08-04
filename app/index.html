@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DeGiro GUI</title>
+</head>
+<body>
+<nav>
+    <a href="index.html">Home</a>
+    <a href="tickers.html">Tickers</a>
+</nav>
+<h1>DeGiro GUI</h1>
+
+<form>
+    Username:<br>
+    <input id="username" title="Username">
+    <br>
+    Password:<br>
+    <input id="password" title="Password">
+    <br><br>
+    <input type="button" id="login" value="Log In">
+    <input title="Always on top" type="checkbox" id="alwaysOnTop" checked/>
+</form>
+
+<script type="text/javascript">
+    require('./renderer');
+</script>
+
+</body>
+</html>
