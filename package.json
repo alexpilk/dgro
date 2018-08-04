@@ -4,6 +4,7 @@
   "description": "GUI based on DeGiro Node JS API.",
   "main": "app/main.js",
   "dependencies": {
+    "mime": "~>1.4.1",
     "degiro": "^3.1.0"
   },
   "devDependencies": {
