@@ -1,6 +1,6 @@
 const {globalShortcut} = require('electron');
 
-const events = require('./degiro-events');
+const events = require('./api/degiro-events');
 
 
 globalShortcut.register('CommandOrControl+X', () => {

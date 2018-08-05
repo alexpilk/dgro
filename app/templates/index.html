@@ -7,25 +7,20 @@
 <body>
 <nav>
     <a href="index.html">Home</a>
-    <a href="tickers.html">Tickers</a>
+    <a href="add_product.html">Add Product</a>
+    <a href="shortcuts.html">Shortcuts</a>
 </nav>
 <h1>DeGiro GUI</h1>
 
 <form>
-    Username:<br>
-    <input id="username" title="Username">
-    <br>
-    Password:<br>
-    <input id="password" title="Password">
-    <br><br>
-    <input type="button" id="login" value="Log In">
     <input title="Always on top" type="checkbox" id="alwaysOnTop" checked/>
+    <label>Always on top</label>
 </form>
 <div id="products">
 
 </div>
 <script type="text/javascript">
-    require('./renderer');
+    require('../renderers/index');
 </script>
 
 </body>

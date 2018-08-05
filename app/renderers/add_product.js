@@ -1,7 +1,5 @@
-var ipcRenderer = require('electron').ipcRenderer;
-
-let remote = require('electron').remote;
-const degiro = require('./degiro-events');
+const ipcRenderer = require('electron').ipcRenderer;
+const degiro = require('../api/degiro-events');
 
 
 document.querySelector('#product_search').addEventListener('click', function () {
@@ -16,14 +14,9 @@ document.querySelector('#product_search').addEventListener('click', function () 
         select_button.innerText = 'Add';
         select_button.addEventListener('click', function () {
             for (let product of products) {
-
-                console.log(product.id);
                 let button = document.getElementById(product.id);
                 if (button.checked) {
-                    alert(remote.getGlobal('products'))
-                    ipcRenderer.send('product_id', product.id)
-                    remote.getGlobal('products').push(product.id);
-                    alert(remote.getGlobal('products'))
+                    ipcRenderer.send('product_id', product);
                     return
                 }
             }
