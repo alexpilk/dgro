@@ -16,7 +16,7 @@ async function loadProducts(degiro) {
 
 function saveProducts(products) {
     let data = '';
-    for (let product of products){
+    for (let product of products) {
         data += product.id + '\r\n'
     }
     fs.writeFile('app/products.txt', data);
@@ -24,7 +24,37 @@ function saveProducts(products) {
 }
 
 
+async function loadShortcuts() {
+    let data = fs.readFileSync('app/shortcuts.txt', 'utf8');
+    let settings = data.split("\r\n");
+    settings.pop();
+    let shortcuts = {};
+    for (let setting of settings) {
+        setting = setting.split(':');
+        shortcuts[setting[1]] = setting[0]
+    }
+    console.log(shortcuts)
+    return shortcuts
+}
+
+
+function saveShortcuts(shortcuts) {
+    let data = '';
+    for (const action of Object.keys(shortcuts)) {
+        const shortcut = shortcuts[action];
+        data += shortcut + ':' + action + '\r\n'
+    }
+    // for (let shortcut of shortcuts) {
+    //     data += shortcut.shortcut + ':' + shortcut.action + '\r\n'
+    // }
+    fs.writeFile('app/shortcuts.txt', data);
+    console.log(data)
+}
+
+
 module.exports = {
     loadProducts,
-    saveProducts
+    saveProducts,
+    loadShortcuts,
+    saveShortcuts
 };

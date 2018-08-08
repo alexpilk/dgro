@@ -1,9 +1,9 @@
 let remote = require('electron').remote;
 const degiro = require('../api/degiro-events');
-
+const ipcRenderer = require('electron').ipcRenderer;
 let cron = require('cron');
 let refresh_interval = 20;
-let cronJob = cron.job('*/' + refresh_interval + ' * * * * *', function(){
+let cronJob = cron.job('*/' + refresh_interval + ' * * * * *', function () {
     refreshProducts()
 });
 cronJob.start();
@@ -23,14 +23,17 @@ async function displayProducts() {
         let product_container = document.createElement('div');
         product_container.id = product.id;
         product_container.innerHTML = await createProductPriceView(product);
-        products.appendChild(product_container)
+        products.appendChild(product_container);
+        document.getElementById(product.vwdId).addEventListener('click', () => {
+            ipcRenderer.send('selected_product', product)
+        })
     }
 }
 
 async function createProductPriceView(product) {
     let price = await degiro.getAskBidPrice(product.vwdId);
     return '' +
-        '<b>' + product.symbol + '</b><br>' +
+        '<input name="product" type="radio" id="' + product.vwdId + '"><b>' + product.symbol + '</b><br>' +
         'Ask price <i>' + price.askPrice + '</i><br>' +
         'Last price: <i>' + price.lastPrice + '</i><br>' +
         'Bid price: <i>' + price.bidPrice + '</i><br>' +

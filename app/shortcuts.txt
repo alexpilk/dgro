@@ -1,0 +1,2 @@
+t:stop_limit_50
+Control+T:stop_limit_100
