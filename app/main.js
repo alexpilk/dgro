@@ -45,7 +45,7 @@ let shortcut_functions = {
                 orderType: DeGiro.OrderTypes.stopLimited,
                 productId: product.id,
                 price: response.lastPrice + 0.05,
-                stopPrice: response.lastPrice,
+                stopPrice: response.lastPrice + 0.01,
                 size: 2
             })
         })
