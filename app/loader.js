@@ -33,7 +33,7 @@ async function loadShortcuts() {
         setting = setting.split(':');
         shortcuts[setting[1]] = setting[0]
     }
-    console.log(shortcuts)
+    console.log(shortcuts);
     return shortcuts
 }
 
