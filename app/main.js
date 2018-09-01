@@ -138,13 +138,13 @@ function stop_loss_part(product, percentage, action) {
 
 let shortcut_functions = {
     stop_limit_buy_50: () => {
-        stop_limit_buy(global.selected_product, 1);
+        stop_limit_buy(global.selected_product, 50);
     },
     stop_limit_buy_100: () => {
-        stop_limit_buy(global.selected_product, 2);
+        stop_limit_buy(global.selected_product, 100);
     },
     stop_limit_buy_200: () => {
-        stop_limit_buy(global.selected_product, 3);
+        stop_limit_buy(global.selected_product, 200);
     },
     stop_limit_buy_half: () => {
         stop_limit_buy_part(global.selected_product, 0.5);
@@ -153,13 +153,13 @@ let shortcut_functions = {
         stop_limit_buy_part(global.selected_product, 1);
     },
     stop_limit_sell_50: () => {
-        stop_limit_sell(global.selected_product, 1);
+        stop_limit_sell(global.selected_product, 50);
     },
     stop_limit_sell_100: () => {
-        stop_limit_sell(global.selected_product, 2);
+        stop_limit_sell(global.selected_product, 100);
     },
     stop_limit_sell_200: () => {
-        stop_limit_sell(global.selected_product, 3);
+        stop_limit_sell(global.selected_product, 200);
     },
     stop_limit_sell_half: () => {
         stop_limit_sell_part(global.selected_product, 0.5);
