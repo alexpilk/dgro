@@ -51,10 +51,15 @@ function saveShortcuts(shortcuts) {
     console.log(data)
 }
 
+function saveLogs(log) {
+    let data = log.join('\n');
+    fs.writeFile('app/log.txt', data)
+}
 
 module.exports = {
     loadProducts,
     saveProducts,
     loadShortcuts,
-    saveShortcuts
+    saveShortcuts,
+    saveLogs
 };

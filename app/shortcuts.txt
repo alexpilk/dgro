@@ -1,2 +1,14 @@
-t:stop_limit_sell_half
-Control+T:stop_limit_buy_100
+Control+Q:stop_limit_buy_50
+Control+W:stop_limit_buy_100
+Control+E:stop_limit_buy_200
+Control+R:stop_limit_buy_half
+Control+T:stop_limit_buy_all
+Control+Y:stop_limit_sell_50
+Control+U:stop_limit_sell_100
+Control+I:stop_limit_sell_200
+Control+O:stop_limit_sell_half
+Control+P:stop_limit_sell_all
+Control+A:stop_loss_buy_half
+Control+S:stop_loss_buy_all
+Control+D:stop_loss_sell_half
+Control+F:stop_loss_sell_all

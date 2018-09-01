@@ -1,20 +1,11 @@
-const ipcRenderer = require('electron').ipcRenderer;
+let remote = require('electron').remote;
 
+let log = remote.getGlobal('log');
+console.log(log);
+let log_container = document.getElementById('log');
 
-document.getElementById('stop_limit_50_button').addEventListener('click', function () {
-    let data = {
-        shortcut: document.getElementById('stop_limit_50').value,
-        action: 'stop_limit_sell_half'
-    };
-    ipcRenderer.send('shortcut', data)
-});
-
-
-// const {globalShortcut} = require('electron');
-//
-// const events = require('./api/degiro-events');
-//
-//
-// globalShortcut.register('Control+G', () => {
-//     console.log('CommandOrControl+X is pressed');
-// });
+for(let message of log) {
+    let element = document.createElement('p');
+    element.appendChild(document.createTextNode(message));
+    log_container.appendChild(element)
+}

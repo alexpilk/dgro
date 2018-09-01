@@ -1,8 +1,7 @@
 const loader = require('./loader');
 const DeGiro = require('degiro');
 const {app, ipcMain, BrowserWindow, globalShortcut} = require('electron');
-// const api = require('./api/degiro-events');
-
+const prompt = require('electron-prompt');
 
 let win;
 let degiro;
@@ -27,17 +26,35 @@ ipcMain.on('selected_product', function (event, id) {
 });
 
 
+function update_log(product, action, size, price, stop_price) {
+    degiro.getAskBidPrice(product.vwdId).then((response) => {
+        let difference = (price - response.lastPrice).toFixed(2);
+        // let message = action + ' ' + size + ' items of ' + product.name +
+        //     '. Price: ' + price + '. Stop price: ' + stop_price + '. Price - Last price = ' + difference;
+        let message = `${action} ${size} items of ${product.name}. Price: ${price}. Stop price ${stop_price}. ` +
+            `Price - Last price = ${difference}`;
+        global.log.push(message);
+        console.log(message);
+        console.log(global.log)
+    })
+}
+
 function stop_limit_buy(product, size) {
     console.log('Buying stop-limit for ' + size + ' items');
     degiro.getAskBidPrice(product.vwdId).then((response) => {
-        console.log(response.lastPrice);
+        let price = (response.lastPrice + 0.05).toFixed(2);
+        let stop_price = (response.lastPrice + 0.01).toFixed(2);
         degiro.setOrder({
             buySell: DeGiro.Actions.buy,
             orderType: DeGiro.OrderTypes.stopLimited,
             productId: product.id,
-            price: (response.lastPrice + 0.05).toFixed(2),
-            stopPrice: (response.lastPrice + 0.01).toFixed(2),
+            price: price,
+            stopPrice: stop_price,
             size: size
+        }).then((response) => {
+            if (response.orderId) {
+                update_log(product, 'buy', size, price, stop_price)
+            }
         })
     })
 }
@@ -46,13 +63,19 @@ function stop_limit_sell(product, size) {
     console.log('Selling stop-limit for ' + size + ' items');
     degiro.getAskBidPrice(product.vwdId).then((response) => {
         console.log(response.lastPrice);
+        let price = (response.lastPrice - 0.05).toFixed(2);
+        let stop_price = (response.lastPrice - 0.01).toFixed(2);
         degiro.setOrder({
             buySell: DeGiro.Actions.sell,
             orderType: DeGiro.OrderTypes.stopLimited,
             productId: product.id,
-            price: (response.lastPrice - 0.05).toFixed(2),
-            stopPrice: (response.lastPrice - 0.01).toFixed(2),
+            price: price,
+            stopPrice: stop_price,
             size: size
+        }).then((response) => {
+            if (response.orderId) {
+                update_log(product, 'Sell', size, price, stop_price)
+            }
         })
     })
 }
@@ -62,19 +85,9 @@ function stop_limit_sell_part(product, percentage) {
     degiro.getPortfolio().then((response) => {
         let portfolio_product = response.portfolio.find(product => product.id === selected_product.id);
         let total_size = portfolio_product.value.find(attribute => attribute.name === 'size').value;
-        let size = total_size * percentage;
+        let size = Math.round(total_size * percentage);
         console.log('Selling ' + size + ' items out of ' + total_size);
-        // console.log(portfolio_product);
-        degiro.getAskBidPrice(product.vwdId).then((response) => {
-            degiro.setOrder({
-                buySell: DeGiro.Actions.sell,
-                orderType: DeGiro.OrderTypes.stopLimited,
-                productId: product.id,
-                price: response.lastPrice - 0.05,
-                stopPrice: response.lastPrice - 0.01,
-                size: size
-            })
-        })
+        stop_limit_sell(product, size)
     });
 }
 
@@ -83,19 +96,43 @@ function stop_limit_buy_part(product, percentage) {
     degiro.getPortfolio().then((response) => {
         let portfolio_product = response.portfolio.find(product => product.id === selected_product.id);
         let total_size = portfolio_product.value.find(attribute => attribute.name === 'size').value;
-        let size = total_size * percentage;
+        let size = Math.round(total_size * percentage);
         console.log('Buying ' + size + ' items out of ' + total_size);
-        // console.log(portfolio_product);
-        degiro.getAskBidPrice(product.vwdId).then((response) => {
+        stop_limit_buy(product, size)
+    });
+}
+
+function stop_loss(product, size, action) {
+    prompt({
+        title: 'Enter stop-loss price for size ' + size,
+        inputAttrs: {
+            type: 'int',
+            required: true
+        },
+        type: 'input'
+    }).then((price) => {
+        if (price === null) {
+            console.log('user cancelled');
+        } else {
             degiro.setOrder({
-                buySell: DeGiro.Actions.buy,
-                orderType: DeGiro.OrderTypes.stopLimited,
+                buySell: action,
+                orderType: DeGiro.OrderTypes.stopLoss,
                 productId: product.id,
-                price: (response.lastPrice + 0.05).toFixed(2),
-                stopPrice: (response.lastPrice + 0.01).toFixed(2),
+                stopPrice: price,
                 size: size
             })
-        })
+        }
+    }).catch(console.error);
+}
+
+
+function stop_loss_part(product, percentage, action) {
+    console.log('Stop-loss for ' + percentage * 100 + '% items');
+    degiro.getPortfolio().then((response) => {
+        let portfolio_product = response.portfolio.find(product => product.id === selected_product.id);
+        let total_size = portfolio_product.value.find(attribute => attribute.name === 'size').value;
+        let size = Math.round(total_size * percentage);
+        stop_loss(product, size, action)
     });
 }
 
@@ -130,34 +167,46 @@ let shortcut_functions = {
     stop_limit_sell_all: () => {
         stop_limit_sell_part(global.selected_product, 1);
     },
+    stop_loss_buy_half: () => {
+        stop_loss_part(global.selected_product, 0.5, DeGiro.Actions.buy);
+    },
+    stop_loss_buy_all: () => {
+        stop_loss_part(global.selected_product, 1, DeGiro.Actions.buy);
+    },
+    stop_loss_sell_half: () => {
+        stop_loss_part(global.selected_product, 0.5, DeGiro.Actions.sell);
+    },
+    stop_loss_sell_all: () => {
+        stop_loss_part(global.selected_product, 1, DeGiro.Actions.sell);
+    },
 };
 
 
 function registerShortcuts(shortcuts) {
-
     for (const action of Object.keys(shortcuts)) {
         const shortcut = shortcuts[action];
-        console.log(action);
-        console.log(shortcut);
         globalShortcut.register(shortcut, shortcut_functions[action]);
     }
-    // for (let shortcut of shortcuts) {
-    //     globalShortcut.register(shortcut.shortcut, shortcut_functions[shortcut.action]);
-    // }
 }
 
 
-async function createWindow() {
+async function prepare_degiro_session() {
     degiro = DeGiro.create();
     const session = await degiro.login();
-    //
+
     global.session = session;
     global.sessionId = session.id;
     global.sessionAccount = session.account;
+}
+
+async function prepare_configuration() {
+    global.log = [];
     global.products = await loader.loadProducts(degiro);
     global.shortcuts = await loader.loadShortcuts();
     registerShortcuts(global.shortcuts);
+}
 
+async function createWindow() {
     win = new BrowserWindow({width: 800, height: 600});
     win.loadFile('app/templates/index.html');
 
@@ -168,26 +217,18 @@ async function createWindow() {
         win = null
     });
     win.setAlwaysOnTop(true, "floating");
-    // globalShortcut.register('Control+G', () => {
-    //     console.log('CommandOrControl+X is pressed');
-    // });
-    //
-    // var events = require('./degiro-events');
-    // globalShortcut.register('CommandOrControl+X', () => {
-    //   console.log('CommandOrControl+X is pressed');
-    //     events.getData();
-    // })
 }
 
-app.on('ready', () => {
-    createWindow();
-    // require('./shortcut-listeners');
+app.on('ready', async () => {
+    await prepare_degiro_session();
+    await prepare_configuration();
+    await createWindow();
 });
 
 app.on('window-all-closed', () => {
     loader.saveProducts(global.products);
-    console.log(global.shortcuts);
     loader.saveShortcuts(global.shortcuts);
+    loader.saveLogs(global.log);
     if (process.platform !== 'darwin') {
         app.quit()
     }
