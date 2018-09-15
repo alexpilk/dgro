@@ -13,12 +13,19 @@
 <h1>DeGiro GUI</h1>
 
 <form>
+    Username:<br>
+    <input id="username" title="Username">
+    <br>
+    Password:<br>
+    <input id="password" title="Password">
+    <br><br>
+    <input type="button" id="login" value="Log In"><br>
+    Always on top:
     <input title="Always on top" type="checkbox" id="alwaysOnTop" checked/>
-    <label>Always on top</label>
 </form>
-<div id="products">
 
-</div>
+<div id="products"></div>
+
 <script type="text/javascript">
     require('../renderers/index');
 </script>

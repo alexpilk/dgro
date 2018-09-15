@@ -3,15 +3,18 @@ const DeGiro = require('degiro');
 
 
 async function createDegiro() {
-    let degiro = DeGiro.create();
     try {
-        degiro.session.id = remote.getGlobal('sessionId');
-        degiro.session.account = remote.getGlobal('sessionAccount');
+        let degiro = DeGiro.create({
+            sessionId: remote.getGlobal('sessionId'),
+            account: remote.getGlobal('sessionAccount')
+        });
+        degiro.session.userToken = remote.getGlobal('userToken');
         await degiro.updateConfig();
+        console.log(degiro.session.id, degiro.session.account);
+        return degiro;
     } catch (e) {
         console.error(e);
     }
-    return degiro;
 }
 
 

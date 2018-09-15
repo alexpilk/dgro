@@ -12,6 +12,7 @@ document.querySelector('#product_search').addEventListener('click', function () 
         const select_button = document.createElement('button');
         select_button.id = 'product_select';
         select_button.innerText = 'Add';
+        select_button.type = 'submit';
         select_button.addEventListener('click', function () {
             for (let product of products) {
                 let button = document.getElementById(product.id);
@@ -37,7 +38,7 @@ function createProductSelectionMenu(products) {
         ticker_button.id = product.id;
         ticker_button.name = 'product';
         ticker_button.value = product.symbol;
-        label.innerText = product.symbol;
+        label.innerText = `${product.symbol}\t|\t${product.name}\t|\t${product.currency}\t|\t${product.isin}`;
         list_element.appendChild(ticker_button);
         list_element.appendChild(label);
         list.appendChild(list_element);

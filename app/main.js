@@ -2,14 +2,22 @@ const loader = require('./loader');
 const DeGiro = require('degiro');
 const {app, ipcMain, BrowserWindow, globalShortcut} = require('electron');
 const prompt = require('electron-prompt');
+const _ = require('underscore')._;
 
 let win;
 let degiro;
 
 
+ipcMain.on('degiro_login', async function (event, username, password) {
+    degiro = DeGiro.create({username: username, password: password});
+    await prepare_degiro_session();
+    await prepare_configuration();
+});
+
+
 ipcMain.on('product_id', function (event, product) {
     global.products.push(product);
-    console.log('Received ' + product)
+    console.log('Received ' + product);
 });
 
 
@@ -20,17 +28,21 @@ ipcMain.on('shortcut', function (event, data) {
 });
 
 
-ipcMain.on('selected_product', function (event, id) {
-    global.selected_product = id;
+ipcMain.on('selected_product', function (event, product) {
+    global.selected_product = product;
     console.log(global.selected_product)
+});
+
+
+ipcMain.on('delete_product', function (event, product_to_delete) {
+    global.products = _.reject(global.products, product => product.id === product_to_delete.id);
+    console.log('Deleted ' + product_to_delete.name)
 });
 
 
 function update_log(product, action, size, price, stop_price) {
     degiro.getAskBidPrice(product.vwdId).then((response) => {
         let difference = (price - response.lastPrice).toFixed(2);
-        // let message = action + ' ' + size + ' items of ' + product.name +
-        //     '. Price: ' + price + '. Stop price: ' + stop_price + '. Price - Last price = ' + difference;
         let message = `${action} ${size} items of ${product.name}. Price: ${price}. Stop price ${stop_price}. ` +
             `Price - Last price = ${difference}`;
         global.log.push(message);
@@ -191,12 +203,12 @@ function registerShortcuts(shortcuts) {
 
 
 async function prepare_degiro_session() {
-    degiro = DeGiro.create();
     const session = await degiro.login();
 
     global.session = session;
     global.sessionId = session.id;
     global.sessionAccount = session.account;
+    global.userToken = session.userToken;
 }
 
 async function prepare_configuration() {
@@ -220,8 +232,14 @@ async function createWindow() {
 }
 
 app.on('ready', async () => {
-    await prepare_degiro_session();
-    await prepare_configuration();
+    degiro = DeGiro.create();
+    try {
+        degiro = DeGiro.create();
+        await prepare_degiro_session();
+        await prepare_configuration();
+    } catch (e) {
+        console.log('Could not log in automatically.')
+    }
     await createWindow();
 });
 
